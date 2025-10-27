@@ -1,0 +1,27 @@
+numarical 
+	continuous
+	discrite
+categorical
+	regular
+	ordinal
+Regular categorical also known as Nominal or Labels
+
+date [10/24/2024] => Numerical, discrite
+quater [2024Q4] => categorical, ordinal
+house_id [16] => categorical, nominal
+house_type [Villa] => categorical, nominal
+sales_type [regular_sale] => categorical, nominal
+year_build [1997] => numarical, discrite
+purchase_price [6500000] => numarical, continuous
+change_between_offer_and_perchage [-3] => numarical, continuous
+no_rooms [5] => numarical, discrite / categorical, ordinal
+sqm [142] => numarical,discrite 
+sqm_price [45774.65] => numarical, continuous
+address [Vestre Plantagevej 3] => categorical, nominal
+zip_code [2680] => categorical, nominal 
+city [Kalundborg] => categorical, nominal
+area [Capital, Copenhagen] => categorical, nominal
+region [Jutland] => categorical, nominal
+nom_interest_rate [3.1] => numarical, continuous
+dk_ann_infl_rate [3.31] => numarical, continuous
+yield_on_mortgage_credit_bonds [4.79] => numarical, continuous
