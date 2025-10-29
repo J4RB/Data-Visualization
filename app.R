@@ -1,4 +1,5 @@
 library(shiny)
+library(leaflet)
 
 source("ui.R")
 source("server.R")
