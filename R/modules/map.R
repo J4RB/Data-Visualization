@@ -10,7 +10,7 @@ map_ui <- function(id) {
     "Map",
     sidebarLayout(
       sidebarPanel(
-        # ---- Metric dropdown (only spatially meaningful metrics) ----
+        # ---- Metric dropdown ----
         selectInput(
           ns("metric"),
           "Select metric to display:",
@@ -22,6 +22,15 @@ map_ui <- function(id) {
             "Year built" = "year_build"
           ),
           selected = "sqm_price"
+        ),
+        tags$hr(),
+        
+        # ---- Aggregation level ----
+        radioButtons(
+          ns("agg_level"),
+          "Aggregate by:",
+          choices = c("ZIP code" = "zip", "Region" = "region"),
+          selected = "zip"
         ),
         tags$hr(),
         
@@ -68,7 +77,7 @@ map_ui <- function(id) {
 }
 
 # ---- SERVER ----
-map_server <- function(id, data, dk_zip_sf) {
+map_server <- function(id, data, dk_zip_sf, geojson_regions) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -76,18 +85,34 @@ map_server <- function(id, data, dk_zip_sf) {
     data <- data %>%
       mutate(year = if ("year" %in% names(.)) year else as.numeric(format(as.Date(date), "%Y")))
     
+    # ---- Map areas to geojson regions ----
+    data <- data %>%
+      mutate(
+        geojson_region = case_when(
+          area %in% c("Capital, Copenhagen", "North Zealand", "Bornholm") ~ "Region Hovedstaden",
+          area == "North jutland" ~ "Region Nordjylland",
+          area == "East & mid jutland" ~ "Region Midtjylland",
+          area %in% c("South jutland", "Fyn & islands") ~ "Region Syddanmark",
+          area == "Other islands" ~ "Region Sjælland",
+          TRUE ~ NA_character_
+        )
+      )
+    
     # ---- Prepare ZIP shapefile ----
     dk_zip_sf <- dk_zip_sf %>%
       st_zm(drop = TRUE, what = "ZM") %>%
       filter(!st_is_empty(geometry)) %>%
       mutate(POSTNR_TXT = as.character(POSTNR_TXT))
     
-    # ---- Dynamic slider UI (based on data years) ----
+    # ---- Prepare regions geojson ----
+    geojson_regions <- geojson_regions %>%
+      st_make_valid() %>%
+      filter(!st_is_empty(geometry))
+    
+    # ---- Year slider UI ----
     output$year_slider_ui <- renderUI({
       req(data)
       years <- sort(unique(data$year))
-      if (length(years) < 2) return(NULL)
-      
       sliderInput(
         ns("year_range"),
         "Select year range:",
@@ -115,9 +140,8 @@ map_server <- function(id, data, dk_zip_sf) {
     
     # ---- Reactive merged data ----
     merged <- reactive({
-      req(data, dk_zip_sf, input$metric)
+      req(data, input$metric)
       metric <- input$metric
-      
       filtered <- data
       
       # ---- Filter by year ----
@@ -140,31 +164,44 @@ map_server <- function(id, data, dk_zip_sf) {
         filtered <- filtered %>% filter(FALSE)
       }
       
-      # ---- Aggregate ----
-      if (nrow(filtered) == 0) {
-        df <- tibble(zip_code = character(), avg_value = numeric(), n = integer())
+      # ---- Aggregate based on selected level ----
+      if (input$agg_level == "zip") {
+        if (nrow(filtered) == 0) {
+          df <- tibble(zip_code = character(), avg_value = numeric(), n = integer())
+        } else {
+          df <- filtered %>%
+            mutate(zip_code = as.character(zip_code)) %>%
+            group_by(zip_code) %>%
+            summarise(avg_value = mean(.data[[metric]], na.rm = TRUE), n = n(), .groups = "drop")
+        }
+        dk_zip_sf %>%
+          left_join(df, by = c("POSTNR_TXT" = "zip_code")) %>%
+          mutate(
+            display_value = ifelse(is.na(avg_value), "No data", round(avg_value, 2)),
+            n = ifelse(is.na(n), 0, n),
+            color_value = ifelse(is.na(avg_value), NA, avg_value)
+          )
       } else {
-        df <- filtered %>%
-          mutate(zip_code = as.character(zip_code)) %>%
-          group_by(zip_code) %>%
-          summarise(
-            avg_value = mean(.data[[metric]], na.rm = TRUE),
-            n = n(),
-            .groups = "drop"
+        # ---- region aggregation ----
+        if (nrow(filtered) == 0) {
+          df <- tibble(geojson_region = character(), avg_value = numeric(), n = integer())
+        } else {
+          df <- filtered %>%
+            group_by(geojson_region) %>%
+            summarise(avg_value = mean(.data[[metric]], na.rm = TRUE), n = n(), .groups = "drop")
+        }
+        geojson_regions %>%
+          left_join(df, by = c("REGIONNAVN" = "geojson_region")) %>%
+          mutate(
+            display_value = ifelse(is.na(avg_value), "No data", round(avg_value, 2)),
+            n = ifelse(is.na(n), 0, n),
+            color_value = ifelse(is.na(avg_value), NA, avg_value)
           )
       }
-      
-      dk_zip_sf %>%
-        left_join(df, by = c("POSTNR_TXT" = "zip_code")) %>%
-        mutate(
-          display_value = ifelse(is.na(avg_value), "No data", round(avg_value, 2)),
-          n = ifelse(is.na(n), 0, n),
-          color_value = ifelse(is.na(avg_value), NA, avg_value)
-        )
     })
     
     # ---- Helper function to render map ----
-    render_map <- function(merged_data, metric_label) {
+    render_map <- function(merged_data, metric_label, agg_level) {
       merged_data <- merged_data %>%
         st_make_valid() %>%
         st_zm(drop = TRUE, what = "ZM") %>%
@@ -172,14 +209,12 @@ map_server <- function(id, data, dk_zip_sf) {
       
       merged_data$color_value <- suppressWarnings(as.numeric(merged_data$color_value))
       merged_data$color_value[is.infinite(merged_data$color_value)] <- NA
-      
       finite_vals <- merged_data$color_value[is.finite(merged_data$color_value)]
       
       leaf <- leaflet(merged_data) %>%
         addTiles() %>%
         setView(lng = 10.0, lat = 56.0, zoom = 6)
       
-      # ---- If no valid data, show borders only ----
       if (length(finite_vals) < 2) {
         leaf <- leaf %>%
           addPolygons(
@@ -187,7 +222,9 @@ map_server <- function(id, data, dk_zip_sf) {
             weight = 1,
             fillOpacity = 0,
             highlightOptions = highlightOptions(weight = 2, color = "black", bringToFront = TRUE),
-            popup = ~paste0("<strong>ZIP: </strong>", POSTNR_TXT, "<br><em>No data</em>")
+            popup = ~paste0("<strong>", ifelse(agg_level == "zip", "ZIP: ", "Region: "), "</strong>", 
+                            ifelse(agg_level == "zip", POSTNR_TXT, REGIONNAVN),
+                            "<br><em>No data</em>")
           )
       } else {
         pal <- colorNumeric("YlOrRd", domain = finite_vals, na.color = "transparent")
@@ -199,7 +236,8 @@ map_server <- function(id, data, dk_zip_sf) {
             fillOpacity = 0.7,
             highlightOptions = highlightOptions(weight = 2, color = "black", bringToFront = TRUE),
             popup = ~paste0(
-              "<strong>ZIP: </strong>", POSTNR_TXT,
+              "<strong>", ifelse(agg_level == "zip", "ZIP: ", "Region: "), "</strong>", 
+              ifelse(agg_level == "zip", POSTNR_TXT, REGIONNAVN),
               "<br><strong>Average ", metric_label, ": </strong>", display_value,
               "<br><strong>Sales records: </strong>", n
             )
@@ -219,18 +257,18 @@ map_server <- function(id, data, dk_zip_sf) {
     # ---- Render map ----
     output$map <- renderLeaflet({
       merged_data <- merged()
-      render_map(merged_data, input$metric)
+      render_map(merged_data, input$metric, input$agg_level)
     })
     
     # ---- React to filters ----
     observeEvent(
       {
-        list(input$metric, input$house_type, input$sales_type, input$year_range)
+        list(input$metric, input$house_type, input$sales_type, input$year_range, input$agg_level)
       },
       {
         merged_data <- merged()
         output$map <- renderLeaflet({
-          render_map(merged_data, input$metric)
+          render_map(merged_data, input$metric, input$agg_level)
         })
       }
     )
