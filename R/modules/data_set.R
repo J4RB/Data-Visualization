@@ -7,8 +7,7 @@ data_set_ui <- function(id) {
   tabPanel(
     "Data Set",
     mainPanel(
-      DTOutput(ns("data_table")),
-      textOutput(ns("msg"))
+      DTOutput(ns("data_table"))
     )
   )
 }
@@ -23,13 +22,10 @@ data_set_server <- function(id, data) {
           pageLength = 25,     # show 25 rows per page
           scrollX = TRUE,      # enable horizontal scroll if many columns
           autoWidth = TRUE,
-          scrollY = '70vh',
+          scrollY = '70vh'
         )
       )
     })
-    
-    
-    output$msg <- renderText("Intro tab!")
     
   })
 }
