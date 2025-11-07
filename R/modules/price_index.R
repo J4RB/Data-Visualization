@@ -17,11 +17,11 @@ price_index_ui <- function(id) {
     sidebarLayout(
       sidebarPanel(
         selectInput(ns("quarter"), "Select base queater", choices = unique(data$quarter), selected = "2020Q1"),
-        selectInput(ns("house_type"), "select house type", choices = c("All", unique(data$house_type)), selected = "All"),
-        selectInput(ns("region"), "select a region", choices = c("All", unique(data$region)),  selected = "All"),
+        selectInput(ns("house_type"), "Select house type", choices = c("All", unique(data$house_type)), selected = "All"),
+        selectInput(ns("region"), "Select a region", choices = c("All", unique(data$region)),  selected = "All"),
         selectInput(ns("no_rooms"), "select a no of rooms", choices = c("All", unique(data$no_rooms)), selected = "All"),
-        sliderInput(ns("year_build"), "Constraction year:", min = min(data$year_build, na.rm = TRUE), max = max(data$year_build, na.rm = TRUE), value = range(data$year_build, na.rm = TRUE), step = 1),
-        sliderInput(ns("year_range"), "Purchase year:", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), value = range(data$year, na.rm = TRUE), step = 1),
+        sliderInput(ns("year_build"), "Constraction year", min = min(data$year_build, na.rm = TRUE), max = max(data$year_build, na.rm = TRUE), value = range(data$year_build, na.rm = TRUE), step = 1),
+        sliderInput(ns("year_range"), "Purchase year", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), value = range(data$year, na.rm = TRUE), step = 1),
         selectInput(ns("graph_type"), "Show graph type", choices = c("Line Chart", "Bar Chart"), selected = "Line Chart")
       ),
       mainPanel(
@@ -78,10 +78,10 @@ price_index_server <- function(id, data) {
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
       
       if (input$graph_type == "Line Chart") {
-        p <- p + geom_line(size = 0.75, alpha = 0.9, color = "#377eb8") + 
-          geom_point(size = 1, alpha = 0.8, color = "#377eb8")
+        p <- p + geom_line(size = 0.75, alpha = 0.9, color = bc) + 
+          geom_point(size = 1, alpha = 0.8, color = bc)
       } else if (input$graph_type == "Bar Chart") {
-        p <- p + geom_col(fill = "#377eb8") 
+        p <- p + geom_col(fill = bc) 
       }
       
       ggplotly(p, tooltip = "text")

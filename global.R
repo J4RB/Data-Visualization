@@ -5,6 +5,7 @@ library(sf)
 library(geojsonio)
 library(dplyr)
 library(lubridate)
+library(scales)
 
 # Load Danish postal code polygons
 dk_zip_sf <- sf::st_read("Data/postnumre.geojson")
@@ -19,3 +20,17 @@ data <- read.csv("Data/DKHousingPricesSample100k.csv", stringsAsFactors = FALSE)
 
 data$date <- as.Date(data$date)
 data$year <- year(data$date)
+
+# global.R
+plot_choices <- c(
+  "Purchase Price" = "purchase_price",
+  "Sqm Price"      = "sqm_price"
+)
+
+bar_plot_choices <- c(
+  "Purchase Price" = "total_value",
+  "No of sales"      = "count"
+)
+
+bc <- "#377eb8"
+y_formatter <- scales::label_number(scale_cut = scales::cut_short_scale(), accuracy = 0.1)
