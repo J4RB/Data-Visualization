@@ -203,14 +203,14 @@ purchase_server <- function(id, data) {
       }
       
       if (input$bar_chart_type == "Position Dodge") {
-        p <- p +  geom_bar(stat = "identity", position = position_dodge(width = 0.8))+
-          geom_text(
-            aes(label = y_formatter(!!sym(input$bar_plot_by))),
-            position = position_dodge(width = 0.8), # match the bars
-            vjust = -0.5, 
-            hjust = -0.1, 
-            size = 3
-          )
+        p <- p +  geom_bar(stat = "identity", position = position_dodge(width = 0.8))#+
+          #geom_text(
+           # aes(label = y_formatter(!!sym(input$bar_plot_by))),
+           # position = position_dodge(width = 0.8), # match the bars
+          #  vjust = -0.5, 
+          #  hjust = -0.1, 
+          #  size = 3
+          #)
       } else {
         total_counts <- bar_data %>%
           group_by(year) %>%
@@ -219,7 +219,9 @@ purchase_server <- function(id, data) {
           geom_text(
             data = total_counts,
             aes(x = factor(year), y = total, label = y_formatter(total)),
-            vjust = -0.8,
+            vjust = -2.5,
+            hjust = -0.9, 
+            size = 3,
             inherit.aes = FALSE
           )
       }
