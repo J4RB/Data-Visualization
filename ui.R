@@ -7,7 +7,7 @@ source("R/modules/heatmap.R")
 source("R/modules/data_set.R")
 source("R/modules/animation.R")
 ui <- navbarPage(
-  title = "Danish house price - Group-16",
+  title = "Danish Residential Housing Prices",
   
   intro_ui("intro"),
   purchase_ui("purchase"),
