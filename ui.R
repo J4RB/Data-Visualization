@@ -13,10 +13,9 @@ ui <- navbarPage(
   intro_ui("intro"),
   purchase_ui("purchase"),
   price_index_ui("price_index"),
-  visualization_ui("visualization"),
-  map_ui("map"),
+  #visualization_ui("visualization"),
   animation_ui("animation"),
   map_ui("map"),
-  data_set_ui("data_set")
+  data_set_ui("data_set"),
   heatmap_ui("heatmap_vis")
 )
