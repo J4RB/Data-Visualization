@@ -3,9 +3,9 @@ source("R/modules/intro.R")
 source("R/modules/purchase_trand.R")
 source("R/modules/price_index.R")
 source("R/modules/map.R")
+source("R/modules/heatmap.R")
 source("R/modules/data_set.R")
 source("R/modules/animation.R")
-
 ui <- navbarPage(
   title = "Danish house price - Group-16",
   
@@ -14,5 +14,6 @@ ui <- navbarPage(
   price_index_ui("price_index"),
   animation_ui("animation"),
   map_ui("map"),
-  data_set_ui("data_set")
+  data_set_ui("data_set"),
+  heatmap_ui("heatmap_vis")
 )
