@@ -2,6 +2,7 @@ library(shiny)
 library(leaflet)
 library(dplyr)
 library(sf)
+library(viridis)
 
 # ---- UI ----
 map_ui <- function(id) {
@@ -86,8 +87,26 @@ map_ui <- function(id) {
       
       mainPanel(
         div(
-          style = "height: calc(100vh - 90px);",  # subtract some space for padding/header
-          leafletOutput(ns("map"), height = "100%")
+          style = "height: calc(100vh - 90px); position: relative;",
+          leafletOutput(ns("map"), height = "100%"),
+          
+          # ---- Absolute color panel on top-right ----
+          absolutePanel(
+            top = 10, right = 10, width = 160, draggable = FALSE,
+            style = "background-color: white; padding: 5px 5px 0px 5px; border-radius: 5px; box-shadow: 2px 2px 5px rgba(0,0,0,0.3);",
+            selectInput(
+              ns("color_palette"),
+              "Color palette:",
+              choices = c(
+                "Yellow-Red" = "YlOrRd",
+                "Viridis" = "viridis",
+                "Magma" = "magma",
+                "Plasma" = "plasma",
+                "Cividis" = "cividis"
+              ),
+              selected = "YlOrRd"
+            )
+          )
         )
       )
     )
@@ -300,7 +319,13 @@ map_server <- function(id, data, dk_zip_sf, geojson_regions) {
       merged_data$color_value[is.infinite(merged_data$color_value)] <- NA
       finite_vals <- merged_data$color_value[is.finite(merged_data$color_value)]
       
-      pal <- colorNumeric("YlOrRd", domain = finite_vals, na.color = "transparent")
+      pal <- switch(input$color_palette,
+                    viridis = colorNumeric(viridis(10, option = "C"), domain = finite_vals, na.color = "transparent"),
+                    magma   = colorNumeric(viridis(10, option = "A"), domain = finite_vals, na.color = "transparent"),
+                    plasma  = colorNumeric(viridis(10, option = "B"), domain = finite_vals, na.color = "transparent"),
+                    cividis = colorNumeric(viridis(10, option = "D"), domain = finite_vals, na.color = "transparent"),
+                    YlOrRd  = colorNumeric("YlOrRd", domain = finite_vals, na.color = "transparent")
+      )
       
       merged_data <- merged_data %>%
         mutate(popup_content = if (agg_level == "zip") {
@@ -338,7 +363,7 @@ map_server <- function(id, data, dk_zip_sf, geojson_regions) {
     observeEvent(
       {
         list(input$metric, input$house_type, input$sales_type, input$year_sold_range,
-             input$year_build_range, input$sqm_range, input$room_range, input$agg_level)
+             input$year_build_range, input$sqm_range, input$room_range, input$agg_level, input$color_palette)
       },
       {
         req(merged())
