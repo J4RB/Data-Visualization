@@ -25,17 +25,17 @@ map_ui <- function(id) {
         ),
         tags$hr(),
         
-        # ---- Aggregation level ----
-        radioButtons(
-          ns("agg_level"),
-          "Aggregate by:",
-          choices = c("ZIP code" = "zip", "Region" = "region"),
-          selected = "zip"
-        ),
-        tags$hr(),
-        
         fluidRow(
-          column(6,
+          column(4,
+                 # ---- Aggregation level ----
+                 radioButtons(
+                   ns("agg_level"),
+                   "Aggregate by:",
+                   choices = c("ZIP code" = "zip", "Region" = "region"),
+                   selected = "zip"
+                 )
+          ),
+          column(4,
                  # ---- Filter: House type ----
                  checkboxGroupInput(
                    ns("house_type"),
@@ -50,7 +50,7 @@ map_ui <- function(id) {
                    selected = c("Villa", "Townhouse", "Apartment", "Summerhouse", "Farm")
                  )
           ),
-          column(6,
+          column(4,
                  # ---- Filter: Sales type ----
                  checkboxGroupInput(
                    ns("sales_type"),
@@ -69,18 +69,19 @@ map_ui <- function(id) {
         
         # ---- Year sold range slider ----
         uiOutput(ns("year_sold_slider_ui")),
+        uiOutput(ns("year_speed_slider_ui")),
+        tags$hr(),
         
         # ---- Year build range slider ----
         uiOutput(ns("year_build_slider_ui")),
+        tags$hr(),
         
         # ---- Sqm range slider ----
         uiOutput(ns("sqm_slider_ui")),
+        tags$hr(),
         
         # ---- Room range slider ----
         uiOutput(ns("room_slider_ui")),
-        
-        # ---- Tip: Shown when filters are empty ----
-        uiOutput(ns("filter_tip"))
       ),
       
       mainPanel(
@@ -138,7 +139,17 @@ map_server <- function(id, data, dk_zip_sf, geojson_regions) {
         value = c(min(years, na.rm = TRUE), max(years, na.rm = TRUE)),
         step = 1,
         sep = "",
-        dragRange = TRUE
+        dragRange = TRUE,
+        animate = animationOptions(
+          interval = 1000,
+          loop = FALSE,
+          playButton = HTML(
+            "<button style='margin-top:20px; background-color:#4CAF50; color:white; padding:2px 6px; border:none; border-radius:4px;'>▶ Play</button>"
+          ),
+          pauseButton = HTML(
+            "<button style='margin-top:20px; background-color:#f44336; color:white; padding:2px 6px; border:none; border-radius:4px;'>❚❚ Pause</button>"
+          )
+        )
       )
     })
     
