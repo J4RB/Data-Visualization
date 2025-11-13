@@ -1,6 +1,6 @@
 # Load UI modules
 source("R/modules/intro.R")
-source("R/modules/purchase_trand.R")
+source("R/modules/purchase_trend.R")
 source("R/modules/price_index.R")
 source("R/modules/map.R")
 source("R/modules/heatmap.R")
