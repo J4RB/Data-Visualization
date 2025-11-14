@@ -18,60 +18,191 @@ purchase_ui <- function(id) {
     "Purchase Trend",
     sidebarLayout(
       sidebarPanel(
-        HTML("<p style='font:bold;'>Filter for Histogram</p>"),
-        sliderInput(ns("year_range_histogram"), "Purchase year", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), step = 1, value = c(2000, max(data$year, na.rm = TRUE))),
-        sliderInput(ns("bin_range_histogram"), "Number of bins", min = 5, max = 50, step = 1, value = 15),
-        pickerInput(ns("house_type_histogram"),"Select house type", choices = c(unique(data$house_type)), selected = c(unique(data$house_type)), multiple = TRUE),
-        pickerInput(ns("no_rooms_histogram"),"Select no rooms", choices = c(unique(data$no_rooms)), selected = c(unique(data$no_rooms)), multiple = TRUE),
-        pickerInput(ns("region_histogram"), "Select a region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
-        selectInput(ns("plot_by_histogram"), "Plot by", choices = plot_choices, selected = "sqm_price"),
-        checkboxInput(ns("color_blind_histogram"), label = "Enable color-blind friendly colors", value = FALSE),
-        actionButton(ns("render_histogram"), "Hide Histogram"),
+        HTML("<p style='font-weight:bold; font-style:italic;text-decoration:underline'>Filter for Histogram</p>"),
+        fluidRow(
+          column(
+            width = 6, 
+            sliderInput(ns("year_range_histogram"), "Purchase year", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), step = 1, value = c(2000, max(data$year, na.rm = TRUE))),
+          ),
+          column(
+            width = 6, 
+            sliderInput(ns("bin_range_histogram"), "Number of bins", min = 5, max = 50, step = 1, value = 15),
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6, 
+            pickerInput(ns("house_type_histogram"),"Select house type", choices = c(unique(data$house_type)), selected = c(unique(data$house_type)), multiple = TRUE),
+          ),
+          column(
+            width = 6, 
+            pickerInput(ns("no_rooms_histogram"),"Select no rooms", choices = sort(unique(data$no_rooms)), selected = sort(unique(data$no_rooms)), multiple = TRUE),
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6, 
+            pickerInput(ns("region_histogram"), "Select a region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
+          ),
+          column(
+            width = 6, 
+            selectInput(ns("plot_by_histogram"), "Plot by", choices = plot_choices, selected = "sqm_price"),
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6, 
+            checkboxInput(ns("color_blind_histogram"), label = "Color-blind friendly colors", value = FALSE),
+          ),
+          column(
+            width = 6, 
+            actionButton(ns("render_histogram"), "Hide Histogram"),
+          )
+        ),
         hr(),
-        br(),
         
-        HTML("<p style='font:bold;'>Filter for Box Plot</p>"),
-        numericInput(ns("max_row_box"), "Max rows to use for plots [0 means all]", value = 500, min = 100, max = 100000, step = 100),
-        sliderInput(ns("year_range_box"), "Purchase year", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), step = 1, value = c(2020, max(data$year, na.rm = TRUE))),
-        pickerInput(ns("house_type_box"),"Select house type", choices = c(unique(data$house_type)), selected = c(unique(data$house_type)), multiple = TRUE),
-        pickerInput(ns("region_box"), "Select a region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
-        pickerInput(ns("no_rooms_box"),"Select no rooms", choices = c(unique(data$no_rooms)), selected = c(unique(data$no_rooms)), multiple = TRUE),
-        selectInput(ns("plot_by_box"), "Plot by", choices = plot_choices, selected = "sqm_price"),
-        checkboxInput(ns("color_blind_box"), label = "Enable color-blind friendly colors", value = FALSE),
-        actionButton(ns("render_box"), "Render Box Plot"),
+        HTML("<p style='font-weight:bold; font-style:italic;text-decoration:underline'>Filter for Box Plot</p>"),
+        fluidRow(
+          column(
+            width = 6, 
+            numericInput(ns("max_row_box"), "Max rows to use for plots [0 means all]", value = 500, min = 100, max = 100000, step = 100),
+          ),
+          column(
+            width = 6, 
+            sliderInput(ns("year_range_box"), "Purchase year", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), step = 1, value = c(2020, max(data$year, na.rm = TRUE))),
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6, 
+            pickerInput(ns("house_type_box"),"Select house type", choices = c(unique(data$house_type)), selected = c(unique(data$house_type)), multiple = TRUE),
+          ),
+          column(
+            width = 6, 
+            pickerInput(ns("region_box"), "Select a region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6, 
+            pickerInput(ns("no_rooms_box"),"Select no rooms", choices = sort(unique(data$no_rooms)), selected = sort(unique(data$no_rooms)), multiple = TRUE),
+          ),
+          column(
+            width = 6, 
+            selectInput(ns("plot_by_box"), "Plot by", choices = plot_choices, selected = "sqm_price"),
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6, 
+            checkboxInput(ns("color_blind_box"), label = "Color-blind friendly colors", value = FALSE),
+          ),
+          column(
+            width = 6, 
+            actionButton(ns("render_box"), "Render Box Plot"),
+          )
+        ),
         hr(),
-        br(),
         
-        HTML("<p style='font:bold;'>Filter for Bar Plot</p>"),
-        sliderInput(ns("year_range_bar"), "Purchase year", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), step = 1, value = c(2020, max(data$year, na.rm = TRUE))),
-        pickerInput(ns("house_type_bar"),"Select house type", choices = c(unique(data$house_type)), selected = c(unique(data$house_type)), multiple = TRUE),
-        pickerInput(ns("region_bar"), "Select a region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
-        pickerInput(ns("no_rooms_bar"),"Select no rooms", choices = c(unique(data$no_rooms)), selected = c(unique(data$no_rooms)), multiple = TRUE),
-        selectInput(ns("plot_by_bar"), "Plot by", choices = bar_plot_choices, selected = "total_value"),
-        selectInput(ns("chart_type_bar"), "Plot bar chart", choices = c("Position Dodge", "Stacked"), selected = "Stacked"),
-        checkboxInput(ns("color_blind_bar"), label = "Enable color-blind friendly colors", value = FALSE),
-        actionButton(ns("render_bar"), "Render Bar Plot"),
+        HTML("<p style='font-weight:bold; font-style:italic;text-decoration:underline'>Filter for Bar Plot</p>"),
+        fluidRow(
+          column(
+            width = 6, 
+            sliderInput(ns("year_range_bar"), "Purchase year", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), step = 1, value = c(2020, max(data$year, na.rm = TRUE))),
+          ),
+          column(
+            width = 6, 
+            pickerInput(ns("house_type_bar"),"Select house type", choices = c(unique(data$house_type)), selected = c(unique(data$house_type)), multiple = TRUE),
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6, 
+            pickerInput(ns("region_bar"), "Select a region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
+          ),
+          column(
+            width = 6, 
+            pickerInput(ns("no_rooms_bar"),"Select no rooms", choices = sort(unique(data$no_rooms)), selected = sort(unique(data$no_rooms)), multiple = TRUE),
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6, 
+            selectInput(ns("plot_by_bar"), "Plot by", choices = bar_plot_choices, selected = "total_value"),
+          ),
+          column(
+            width = 6, 
+            selectInput(ns("chart_type_bar"), "Plot bar chart", choices = c("Position Dodge", "Stacked"), selected = "Stacked"),
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6, 
+            checkboxInput(ns("color_blind_bar"), label = "Color-blind friendly colors", value = FALSE),
+          ),
+          column(
+            width = 6, 
+            actionButton(ns("render_bar"), "Render Bar Plot"),
+          )
+        ),
         hr(),
-        br(),
         
-        HTML("<p style='font:bold;'>Filter for Scart Plot</p>"),
-        numericInput(ns("max_row_scart"), "Max rows to use for plots [0 means all]", value = 500, min = 100, max = 100000, step = 100),
-        sliderInput(ns("year_range_scart"), "Purchase year", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), step = 1, value = c(2022, max(data$year, na.rm = TRUE))),
-        pickerInput(ns("house_type_scart"),"Select house type", choices = c(unique(data$house_type)), selected = c(unique(data$house_type)), multiple = TRUE),
-        pickerInput(ns("region_scart"), "Select a region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
-        pickerInput(ns("no_rooms_scart"),"Select no rooms", choices = c(unique(data$no_rooms)), selected = c(unique(data$no_rooms)), multiple = TRUE),
-        selectInput(ns("plot_by_scart"), "Plot by", choices = plot_choices, selected = "sqm_price"),
-        selectInput(ns("chart_type_scart"), "Scart Plot", choices = c("Distribution", "Facet Wrap"), selected = "Distribution"),
-        checkboxInput(ns("color_blind_scart"), label = "Enable color-blind friendly colors", value = FALSE),
-        actionButton(ns("render_scart"), "Render Scart Plot"),
+        HTML("<p style='font-weight:bold; font-style:italic;text-decoration:underline'>Filter for Scart Plot</p>"),
+        fluidRow(
+          column(
+            width = 6, 
+            numericInput(ns("max_row_scart"), "Max rows to use for plots [0 means all]", value = 500, min = 100, max = 100000, step = 100),
+          ),
+          column(
+            width = 6, 
+            sliderInput(ns("year_range_scart"), "Purchase year", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), step = 1, value = c(2022, max(data$year, na.rm = TRUE))),
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6, 
+            pickerInput(ns("house_type_scart"),"Select house type", choices = c(unique(data$house_type)), selected = c(unique(data$house_type)), multiple = TRUE),
+          ),
+          column(
+            width = 6, 
+            pickerInput(ns("region_scart"), "Select a region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6, 
+            pickerInput(ns("no_rooms_scart"),"Select no rooms", choices = sort(unique(data$no_rooms)), selected = sort(unique(data$no_rooms)), multiple = TRUE),
+          ),
+          column(
+            width = 6, 
+            selectInput(ns("plot_by_scart"), "Plot by", choices = plot_choices, selected = "sqm_price"),
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6, 
+            selectInput(ns("chart_type_scart"), "Scart Plot", choices = c("Distribution", "Facet Wrap"), selected = "Distribution"),
+          ),
+          column(
+            width = 6, 
+            checkboxInput(ns("color_blind_scart"), label = "Color-blind friendly colors", value = FALSE),
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6, 
+            actionButton(ns("render_scart"), "Render Scart Plot"),
+          )
+        ),
       ),
+      
       mainPanel( 
         withSpinner(plotlyOutput(ns("histogram_point"))),
-        br(),br(),
+        hr(),
         withSpinner(plotlyOutput(ns("box_plot"))),
-        br(),br(),
+        hr(),
         withSpinner(plotlyOutput(ns("bar_plot"))),
-        br(),br(),
+        hr(),
         withSpinner(plotlyOutput(ns("scart_point"))),
       )
     )
@@ -159,7 +290,7 @@ purchase_server <- function(id, data) {
           ) +
         scale_x_continuous(labels = comma) +
         labs(
-          title = paste("Histogram of", plot_label, "from year ",year_1,' to ', year_2),
+          title = paste("Histogram of", plot_label, "from year <b>",year_1,'</b> to <b>', year_2, '</b>'),
           x = plot_label,
           y = "Count",
           fill = "House Type"
@@ -213,7 +344,7 @@ purchase_server <- function(id, data) {
         geom_boxplot(alpha = 0.7, outlier.colour = "red", outlier.shape = 16) +
         scale_y_continuous(labels = comma) +
         labs(
-          title = paste("Box Plot of", plot_label, "by House Type from year ", year_1,' to ', year_2),
+          title = paste("Box Plot of", plot_label, "by House Type from year <b>", year_1,'</b> to <b>', year_2,'</b>'),
           x = "House Type",
           y = plot_label,
           fill = "House Type"
@@ -314,14 +445,14 @@ purchase_server <- function(id, data) {
       
       year_1 <- input$year_range_scart[1]
       year_2 <- input$year_range_scart[2]
-      filter_house_type <- input$house_typescart
+      filter_house_type <- input$house_type_scart
       filter_region <- input$region_scart 
       filter_no_rooms <- input$no_rooms_scart
       plot_by <- input$plot_by_scart 
       max_rows <- input$max_row_scart 
       color_blind <- input$color_blind_scart
       chart_type <- input$chart_type_scart
-      plot_label <- names(plot_choices)[plot_choices == input$plot_by]
+      plot_label <- names(plot_choices)[plot_choices == plot_by]
       
       filter_data <- data %>%
         filter(year >= year_1 & year <= year_2) %>%
@@ -351,7 +482,7 @@ purchase_server <- function(id, data) {
       geom_point(alpha = 0.6, size = 3) +
       geom_jitter(width = 0.1, height = 0.1, alpha = 0.4) +
       labs(
-        title = paste0("Perchase record of <b>from year ", year_1,' to ', year_2, "</b> for <b>",  paste(filter_house_type, collapse = ", "), "</b> house type"),
+        title = paste0("Perchase record from year <b>", year_1,'</b> to <b>', year_2, "</b> for <b>",  paste(filter_house_type, collapse = ", "), "</b> house type"),
         x = "Date",
         y = plot_label,
         color = "House Type"
