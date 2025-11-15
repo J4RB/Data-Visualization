@@ -42,7 +42,7 @@ purchase_ui <- function(id) {
         fluidRow(
           column(
             width = 6, 
-            pickerInput(ns("region_histogram"), "Select a region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
+            pickerInput(ns("region_histogram"), "Select region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
           ),
           column(
             width = 6, 
@@ -79,7 +79,7 @@ purchase_ui <- function(id) {
           ),
           column(
             width = 6, 
-            pickerInput(ns("region_box"), "Select a region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
+            pickerInput(ns("region_box"), "Select region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
           )
         ),
         fluidRow(
@@ -118,7 +118,7 @@ purchase_ui <- function(id) {
         fluidRow(
           column(
             width = 6, 
-            pickerInput(ns("region_bar"), "Select a region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
+            pickerInput(ns("region_bar"), "Select region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
           ),
           column(
             width = 6, 
@@ -165,7 +165,7 @@ purchase_ui <- function(id) {
           ),
           column(
             width = 6, 
-            pickerInput(ns("region_scart"), "Select a region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
+            pickerInput(ns("region_scart"), "Select region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
           )
         ),
         fluidRow(
