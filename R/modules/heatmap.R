@@ -10,11 +10,12 @@ heatmap_ui <- function(id) {
     "Heatmap",
     sidebarLayout(
       sidebarPanel(
-        selectInput(
-          ns("region_choice"),
-          "Select Region",
-          choices = c("All", unique(data$region)),
-          selected = "All"
+        pickerInput(
+          ns("region"), 
+          "Select region", 
+          choices = c(unique(data$region)), 
+          selected = c(unique(data$region)), 
+          multiple = TRUE
         ),
         selectInput(
           ns("metric_choice"),
@@ -25,6 +26,20 @@ heatmap_ui <- function(id) {
             "Average Year Built" = "year_build"
           ),
           selected = "sqm_price"
+        ),
+        sliderInput(
+          ns("year_range"),
+          "Select Year Range",
+          min = min(data$year, na.rm = TRUE),
+          max = max(data$year, na.rm = TRUE),
+          value = c(min(data$year, na.rm = TRUE), max(data$year, na.rm = TRUE)),
+          step = 1,
+          sep = ""
+        ),
+        checkboxInput(
+          ns("colorblind"),
+          "Colorblind-friendly colors",
+          value = FALSE
         )
       ),
       mainPanel(
@@ -38,11 +53,12 @@ heatmap_server <- function(id, data) {
   moduleServer(id, function(input, output, session) {
     
     filtered_data <- reactive({
-     if (input$region_choice == "All"){
-       data
-     } else {
-       data %>% filter(region == input$region_choice)
-     } 
+      data %>% 
+        filter(region %in% input$region) %>% 
+        filter(
+          year >= input$year_range[1],
+          year <= input$year_range[2]
+        )
     })
     
     output$heat_map <- renderPlot({
@@ -58,11 +74,29 @@ heatmap_server <- function(id, data) {
         "year_build" = "Average Year Built"
       )
       
+      region_label <- if (length(input$region) == length(unique(data$region))) {
+        "All Regions"
+      } else {
+        paste(input$region, collapse = ", ")
+      }
+      
+      if (input$colorblind) {
+        fill_scale <- scale_fill_viridis_c(
+          option = "plasma",
+          name = metric_label
+        )
+      } else {
+        fill_scale <- scale_fill_viridis_c(
+          option = "mako",
+          name = metric_label
+        )
+      }
+      
       ggplot(df, aes(x = house_type, y = factor(no_rooms), fill = value)) +
         geom_tile(color = "white") +
-        scale_fill_viridis_c(option = "mako", name = metric_label) +
+        fill_scale +
         labs(
-          title = paste(metric_label, "by House Type and Rooms —", input$region_choice),
+          title = paste(metric_label, "by House Type and Rooms —", region_label),
           x = "House Type",
           y = "Number of Rooms"
         ) +
