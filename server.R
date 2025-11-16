@@ -6,6 +6,7 @@ source("R/modules/map.R")
 source("R/modules/data_set.R")
 source("R/modules/animation.R")
 source("R/modules/heatmap.R")
+source("R/modules/negotiation_plot.R")
 
 server <- function(input, output, session) {
   # Call each module’s server logic
@@ -16,4 +17,5 @@ server <- function(input, output, session) {
   heatmap_server("heatmap_vis", data)
   data_set_server("data_set", data)
   animation_server("animation", data)
+  negotiation_plot_server("negotiation_plot_vis", data)
 }
