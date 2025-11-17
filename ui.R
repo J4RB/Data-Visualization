@@ -7,6 +7,7 @@ source("R/modules/heatmap.R")
 source("R/modules/data_set.R")
 source("R/modules/animation.R")
 source("R/modules/negotiation_plot.R")
+source("R/modules/ai.R")
 
 ui <- navbarPage(
   title = "Danish Residential Housing Prices",
@@ -18,5 +19,6 @@ ui <- navbarPage(
   map_ui("map"),
   data_set_ui("data_set"),
   heatmap_ui("heatmap_vis"),
-  negotiation_plot_ui("negotiation_plot_vis")
+  negotiation_plot_ui("negotiation_plot_vis"),
+  ai_ui("ai")
 )
