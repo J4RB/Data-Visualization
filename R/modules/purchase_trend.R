@@ -95,10 +95,6 @@ purchase_ui <- function(id) {
         fluidRow(
           column(
             width = 6, 
-            checkboxInput(ns("color_blind_box"), label = "Color-blind friendly colors", value = FALSE),
-          ),
-          column(
-            width = 6, 
             actionButton(ns("render_box"), "Render Box Plot"),
           )
         ),
@@ -283,19 +279,21 @@ purchase_server <- function(id, data) {
       
       p <- ggplot(filter_data, aes(x = .data[[plot_by]]
                                    , fill = house_type
-                                   , text = paste("House type:", house_type)
+                                   , text = paste(house_type)
                                   )) +
         geom_histogram(
           alpha = 0.7, position = "identity", bins = bins
           ) +
         scale_x_continuous(labels = comma) +
         labs(
-          title = paste("Histogram of", plot_label, "from year <b>",year_1,'</b> to <b>', year_2, '</b>'),
+          title = paste("Distribution of Danish Housing ", plot_label, " Accross the Selected Year Range <b>",year_1,'</b> to <b>', year_2
+                        , '</b>'),
           x = plot_label,
           y = "Count",
           fill = "House Type"
         ) +
-        theme_minimal(base_size = 12)
+        theme_minimal(base_size = 12) +
+        theme(plot.title = element_text(size = plot_title))
       
         if (isTRUE(color_blind)) {
           p <- p + scale_fill_viridis_d(option = "E", begin = 0.1, end = 0.9)
@@ -317,7 +315,6 @@ purchase_server <- function(id, data) {
       filter_region <- input$region_box
       filter_no_rooms <- input$no_rooms_box
       plot_by <- input$plot_by_box
-      color_blind <- input$color_blind_box
       max_rows <- input$max_row_box
       plot_label <- names(plot_choices)[plot_choices == plot_by]
       
@@ -334,7 +331,7 @@ purchase_server <- function(id, data) {
       p <- ggplot(filter_data, aes(
         x = house_type,
         y = .data[[plot_by]],
-        fill = house_type,
+        #fill = house_type,
         text = paste(
           "House Type:", house_type,
           "<br>", plot_label, ":", .data[[plot_by]],
@@ -344,18 +341,14 @@ purchase_server <- function(id, data) {
         geom_boxplot(alpha = 0.7, outlier.colour = "red", outlier.shape = 16) +
         scale_y_continuous(labels = comma) +
         labs(
-          title = paste("Box Plot of", plot_label, "by House Type from year <b>", year_1,'</b> to <b>', year_2,'</b>'),
+          title = paste("Boxplot of Danish Housing ", plot_label, " by House Type for Year between <b>", year_1,'</b> to <b>', year_2,'</b>'),
           x = "House Type",
           y = plot_label,
           fill = "House Type"
         ) +
-        theme_minimal(base_size = 12)
-      
-        if (isTRUE(color_blind)) {
-          p <- p + scale_fill_viridis_d(option = "E", begin = 0.1, end = 0.9)
-        } else {
-          p <- p + scale_fill_brewer(palette = "Set2")
-        }
+        theme_minimal(base_size = 12) +
+        theme(plot.title = element_text(size = plot_title)) +
+        guides(fill = "none")
       
       ggplotly(p, tooltip = "text")
     })
@@ -405,12 +398,13 @@ purchase_server <- function(id, data) {
           x = "Year",
           y = paste0("Total ",  plot_label),
           fill = "House Type",
-          title = paste0("<b>", plot_label, "</b> by Year and House Type")
+          title = paste0(chart_type, " Barplot of Danish Housing ",  plot_label, " for Year between <b>", year_1,'</b> to <b>', year_2
+                         ,'</b> for Different House Type')
         ) +
         theme_minimal(base_size = 14) +
         scale_y_continuous(labels = label_number(scale_cut = cut_short_scale(), accuracy = 0.1)) +
         theme(
-          plot.title = element_text(size = 16)
+          plot.title = element_text(size = plot_title)
           , axis.text.x = element_text(angle = 45, hjust = 1)
         )
       
@@ -482,12 +476,15 @@ purchase_server <- function(id, data) {
       geom_point(alpha = 0.6, size = 3) +
       geom_jitter(width = 0.1, height = 0.1, alpha = 0.4) +
       labs(
-        title = paste0("Perchase record from year <b>", year_1,'</b> to <b>', year_2, "</b> for <b>",  paste(filter_house_type, collapse = ", "), "</b> house type"),
+        title = paste0("Scatterplot of Danish Housing ", plot_label," of Selected Year between <b>", year_1,'</b> to <b>', year_2
+                       , "</b> for Selected House Type (<span style='font-size:", (plot_title - 2) ,"pt'>Mean: ", y_formatter(mean_y) ,"</span>)"),
         x = "Date",
         y = plot_label,
         color = "House Type"
       )+
-      geom_hline(yintercept = mean_y, color = "red", linetype = "dashed") +
+        geom_smooth(method = "lm", se = TRUE, aes(group = house_type, color = house_type)) +
+      geom_hline(yintercept = mean_y, color = "#FF6666", linetype = "dashed"
+                 , size = 0.3, alpha = .5) +
       annotate(
         "text",
         x = mean(filter_data$date),
@@ -499,7 +496,7 @@ purchase_server <- function(id, data) {
       )+
       theme_minimal(base_size = 12) + 
       theme(
-        plot.title = element_markdown(size = 14),
+        plot.title = element_markdown(size = plot_title),
         axis.text.x = element_text(angle = 45, hjust = 1)
       )
       
