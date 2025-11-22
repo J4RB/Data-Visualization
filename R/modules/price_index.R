@@ -101,6 +101,8 @@ price_index_server <- function(id, data) {
         )%>%
         mutate(my_value = factor(.data[[group_by_field]] , levels = unique(.data[[group_by_field]]), ordered = TRUE))
       
+      base_data <- hpi_data %>% filter(my_value == base_type_value)
+      
       p <- hpi_data %>%
         ggplot( aes(
           x = my_value,
@@ -113,7 +115,8 @@ price_index_server <- function(id, data) {
           )
         )) +
         labs(
-          title = paste0("Overall House Price Index (Base ", group_by_field ," = <b>", base_type_value, "</b>)"),
+          title = paste0("Tracking the Danish Housing Market (",group_by_field,"ly): Housing Price Index from Year <b>",year_1,"</b> to <b>",year_2
+          ,"</b> (Base ", group_by_field ," = <b>", base_type_value, "</b>)"),
           x = group_by_field,
           y = paste0("House Price Index")
         ) +
@@ -121,7 +124,8 @@ price_index_server <- function(id, data) {
         scale_x_discrete(
           breaks = levels(hpi_data$my_value)[seq(1, length(levels(hpi_data$my_value)), by = 4)]
         ) +  # show every 4th quarter
-        theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")
+        theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none",
+              plot.title = element_text(size = plot_title))
       
       if (graph_type == "Line Chart") {
         p <- p + geom_line(aes(color = "HPI"), size = 0.75, alpha = 0.9) + 
@@ -130,7 +134,7 @@ price_index_server <- function(id, data) {
         if (isTRUE(color_blind)) {
           p <- p + scale_color_viridis_d(option = "E")
         } else {
-          p <- p + scale_color_brewer(palette = "Set2")
+          p <- p + scale_color_brewer(palette = color_palette)
         }
         
       } else if (graph_type == "Bar Chart") {
@@ -140,10 +144,24 @@ price_index_server <- function(id, data) {
         if (isTRUE(color_blind)) {
           p <- p + scale_fill_viridis_d(option = "E")
         } else {
-          p <- p + scale_fill_brewer(palette = "Set2")
+          p <- p + scale_fill_brewer(palette = color_palette)
         }
       }
       
+      p <- p +
+        geom_point(
+          data = base_data,
+          aes(x = my_value, y = hpi),
+          color = "red",
+          size = 3
+        ) +
+        geom_text(
+          data = base_data,
+          aes(x = my_value, y = hpi, label = paste0("Base = ", round(hpi,1))),
+          vjust = -1,
+          color = "red",
+          fontface = "bold"
+        )
       
       
       suppressWarnings(ggplotly(p, tooltip = "text"))
@@ -204,6 +222,9 @@ price_index_server <- function(id, data) {
       
       hpi_data$my_value <- factor(hpi_data[[group_by_field]], levels = unique(hpi_data[[group_by_field]]), ordered = TRUE)
       
+      base_data <- hpi_data %>%
+        filter(.data[[group_by_field]] == base_type_value)
+      
       my_value_levels <- levels(hpi_data$my_value)
       n_my_values <- length(my_value_levels)
       x_breaks <- my_value_levels[seq(1, n_my_values, by = 4)]
@@ -222,14 +243,16 @@ price_index_server <- function(id, data) {
           )
         )) +
         labs(
-          title = paste0("House Price Index by Region (Base ", group_by_field ,"  = <b>", base_type_value, "</b>)"),
+          title = paste0("Tracking the Danish Housing Market (",group_by_field,"ly) by Region: Housing Price Index from Year <b>",year_1,"</b> to <b>",year_2
+                         ,"</b> (Base ", group_by_field ," = <b>", base_type_value, "</b>)"),
           x = group_by_field,
           y = paste0("House Price Index"),
           color = "Region"
         ) +
         theme_minimal(base_size = 12) +   
         scale_x_discrete(breaks = x_breaks) +  # show every 4th quarter
-        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+        theme(axis.text.x = element_text(angle = 45, hjust = 1),
+              plot.title = element_text(size = plot_title))
       
       if (input$graph_type == "Line Chart") {
         p <- p + geom_line(size = 0.75, alpha = 0.9) + 
@@ -238,7 +261,7 @@ price_index_server <- function(id, data) {
         if (isTRUE(color_blind)) {
           p <- p + scale_color_viridis_d(option = "E")
         } else {
-          p <- p + scale_color_brewer(palette = "Set2")
+          p <- p + scale_color_brewer(palette = color_palette)
         }
         
       } else if (input$graph_type == "Bar Chart") {
@@ -248,9 +271,26 @@ price_index_server <- function(id, data) {
         if (isTRUE(color_blind)) {
           p <- p + scale_fill_viridis_d(option = "E")
         } else {
-          p <- p + scale_fill_brewer(palette = "Set2")
+          p <- p + scale_fill_brewer(palette = color_palette)
         }
       }
+      
+      p <- p +
+        geom_point(
+          data = base_data,
+          aes(x = my_value, y = hpi, color = region),
+          size = 3,
+          shape = 21,
+          fill = "red"   # optional: make the point standout
+        ) +
+        geom_text(
+          data = base_data,
+          aes(x = my_value, y = hpi, label = paste0("Base = ", round(hpi, 1))),
+          vjust = -1,
+          color = "red",
+          fontface = "bold",
+          show.legend = FALSE
+        )
       
       suppressWarnings(
         suppressMessages((ggplotly(p, tooltip = "text"))

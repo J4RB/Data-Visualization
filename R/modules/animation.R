@@ -51,9 +51,10 @@ animation_server <- function(id, data) {
       anim <- rank_data %>%
         ggplot(aes(x = -rank, y = total, fill = house_type)) +
         geom_col(width = 0.7) +
-        geom_text(aes(label = paste0(house_type, '[',y_formatter(total),']')), hjust = -0.1) +
+        geom_text(aes(label = paste0(house_type, ' [',y_formatter(total),']')), hjust = -0.1) +
         scale_x_continuous(expand = expansion(mult = c(0, 0.2))) +
-        labs(title = paste0("Rank for Year: <b>{closest_state}</b> using <b><i>", plot_label, "</i></b>"), y = "Total Purchase Price") +
+        labs(title = paste0("Bar Chart of Danish Housing: Favorite House type for Year: <b>{closest_state}</b> by <b><i>", plot_label, "</i></b>")
+             , y = "Total Purchase Price") +
         coord_flip(clip = "off") +
         transition_states(year, transition_length = 4, state_length = 2, wrap = FALSE) +
         view_follow(fixed_x = TRUE, fixed_y = FALSE) +   # <-- Dynamic Y-axis
@@ -63,13 +64,13 @@ animation_server <- function(id, data) {
         theme(
           legend.position = "none",
           plot.margin = margin(0, 60, 0, 0),
-          plot.title = element_markdown(size = 18),
+          plot.title = element_markdown(size = plot_title),
         )
       
       if (isTRUE(color_blind)) {
         anim <- anim + scale_fill_viridis_d(option = "E")
       } else {
-        anim <- anim + scale_fill_brewer(palette = "Set2")
+        anim <- anim + scale_fill_brewer(palette = color_palette)
       }
       
       

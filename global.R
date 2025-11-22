@@ -36,3 +36,4 @@ bc <- "#377eb8"
 y_formatter <- scales::label_number(scale_cut = scales::cut_short_scale(), accuracy = 0.1)
 
 plot_title <- 11
+color_palette <-"Dark2"

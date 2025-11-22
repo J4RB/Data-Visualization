@@ -298,7 +298,7 @@ purchase_server <- function(id, data) {
         if (isTRUE(color_blind)) {
           p <- p + scale_fill_viridis_d(option = "E", begin = 0.1, end = 0.9)
         } else {
-          p <- p + scale_fill_brewer(palette = "Set2")
+          p <- p + scale_fill_brewer(palette = color_palette)
         }
       
       ggplotly(p, tooltip = "text")
@@ -411,7 +411,7 @@ purchase_server <- function(id, data) {
       if (isTRUE(color_blind)) {
         p <- p + scale_fill_viridis_d(option = "E", begin = 0.1, end = 0.9)
       } else {
-        p <- p + scale_fill_brewer(palette = "Set2")
+        p <- p + scale_fill_brewer(palette = color_palette)
       }
       
       if (chart_type == "Position Dodge") {
@@ -460,20 +460,20 @@ purchase_server <- function(id, data) {
       
       mean_y <- mean(filter_data[[plot_by]], na.rm = TRUE)
       
-      p <- ggplot(filter_data, aes(x = date, y = .data[[plot_by]], color = house_type
-                                   , text =  paste(
-                                     "Date:", date,
-                                     "<br>", plot_label,":", .data[[plot_by]],
-                                     "<br>House Type:", house_type,
-                                     "<br>Room No:", no_rooms,
-                                     "<br>Region:", region
-                                   )
-      ))+
+      p <- ggplot(filter_data, aes(x = date, y = .data[[plot_by]], color = house_type))+
       #facet_wrap(~ no_rooms) +
       scale_y_continuous(
         labels = label_number(scale_cut = cut_short_scale())
       )+
-      geom_point(alpha = 0.6, size = 3) +
+      geom_point(alpha = 0.5
+                 , size = .4
+                 , aes(text =  paste(
+                   "Date:", date,
+                   "<br>", plot_label,":", .data[[plot_by]],
+                   "<br>House Type:", house_type,
+                   "<br>Room No:", no_rooms,
+                   "<br>Region:", region
+                 ))) +
       geom_jitter(width = 0.1, height = 0.1, alpha = 0.4) +
       labs(
         title = paste0("Scatterplot of Danish Housing ", plot_label," of Selected Year between <b>", year_1,'</b> to <b>', year_2
@@ -482,7 +482,7 @@ purchase_server <- function(id, data) {
         y = plot_label,
         color = "House Type"
       )+
-        geom_smooth(method = "lm", se = TRUE, aes(group = house_type, color = house_type)) +
+      geom_smooth(method = "lm", se = TRUE, aes(group = house_type, color = house_type)) +
       geom_hline(yintercept = mean_y, color = "#FF6666", linetype = "dashed"
                  , size = 0.3, alpha = .5) +
       annotate(
@@ -498,7 +498,8 @@ purchase_server <- function(id, data) {
       theme(
         plot.title = element_markdown(size = plot_title),
         axis.text.x = element_text(angle = 45, hjust = 1)
-      )
+      )+ 
+        guides(color = guide_legend(override.aes = list(size = 3)))
       
       if (chart_type == 'Facet Wrap') {
         p <- p + facet_wrap(~ no_rooms) 
@@ -507,10 +508,11 @@ purchase_server <- function(id, data) {
       if (isTRUE(color_blind)) {
         p <- p + scale_color_viridis_d(option = "E", begin = 0.1, end = 0.9)
       } else {
-        p <- p + scale_color_brewer(palette = "Set2")
+        p <- p + scale_color_brewer(palette = color_palette)
       }
       
-      ggplotly(p, tooltip = "text")
+      ggplotly(p, tooltip = "text")%>%
+        layout(legend = list(itemsizing = "constant"))
     })
   })
 }
