@@ -10,6 +10,7 @@ library(dplyr)
 library(shinycssloaders)
 library(scales)
 library(shinyWidgets)
+library(wesanderson)
 
 # UI
 purchase_ui <- function(id) {
@@ -18,6 +19,11 @@ purchase_ui <- function(id) {
     "Purchase Trend",
     sidebarLayout(
       sidebarPanel(
+        HTML('
+          <p>For using the graphs, please use the button <b>"Render"</b>. For example, if you want to see Box plot then click <b>"Render Box Plot"</b> button.</p>
+          <p>Every graph has their own filter to filter different factors. Defaut only histogram is rendered.</p>
+        '),
+        
         HTML("<p style='font-weight:bold; font-style:italic;text-decoration:underline'>Filter for Histogram</p>"),
         fluidRow(
           column(
@@ -26,7 +32,7 @@ purchase_ui <- function(id) {
           ),
           column(
             width = 6, 
-            sliderInput(ns("bin_range_histogram"), "Number of bins", min = 5, max = 50, step = 1, value = 15),
+            sliderInput(ns("bin_range_histogram"), "Number of bins", min = 5, max = 50, step = 1, value = 40),
           )
         ),
         fluidRow(
@@ -59,6 +65,9 @@ purchase_ui <- function(id) {
             actionButton(ns("render_histogram"), "Hide Histogram"),
           )
         ),
+        br(),
+        br(),
+        br(),
         hr(),
         
         HTML("<p style='font-weight:bold; font-style:italic;text-decoration:underline'>Filter for Box Plot</p>"),
@@ -98,13 +107,17 @@ purchase_ui <- function(id) {
             actionButton(ns("render_box"), "Render Box Plot"),
           )
         ),
+        br(),
+        br(),
+        br(),
+        br(),
         hr(),
         
         HTML("<p style='font-weight:bold; font-style:italic;text-decoration:underline'>Filter for Bar Plot</p>"),
         fluidRow(
           column(
             width = 6, 
-            sliderInput(ns("year_range_bar"), "Purchase year", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), step = 1, value = c(2020, max(data$year, na.rm = TRUE))),
+            sliderInput(ns("year_range_bar"), "Purchase year", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), step = 1, value = c(2000, max(data$year, na.rm = TRUE))),
           ),
           column(
             width = 6, 
@@ -128,7 +141,7 @@ purchase_ui <- function(id) {
           ),
           column(
             width = 6, 
-            selectInput(ns("chart_type_bar"), "Plot bar chart", choices = c("Position Dodge", "Stacked"), selected = "Stacked"),
+            selectInput(ns("chart_type_bar"), "Plot bar chart", choices = c("Position Dodge", "Stacked"), selected = "Position Dodge"),
           )
         ),
         fluidRow(
@@ -141,6 +154,10 @@ purchase_ui <- function(id) {
             actionButton(ns("render_bar"), "Render Bar Plot"),
           )
         ),
+        br(),
+        br(),
+        br(),
+        br(),
         hr(),
         
         HTML("<p style='font-weight:bold; font-style:italic;text-decoration:underline'>Filter for Scart Plot</p>"),
@@ -151,7 +168,7 @@ purchase_ui <- function(id) {
           ),
           column(
             width = 6, 
-            sliderInput(ns("year_range_scart"), "Purchase year", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), step = 1, value = c(2022, max(data$year, na.rm = TRUE))),
+            sliderInput(ns("year_range_scart"), "Purchase year", min = min(data$year, na.rm = TRUE), max = max(data$year, na.rm = TRUE), step = 1, value = c(2000, max(data$year, na.rm = TRUE))),
           )
         ),
         fluidRow(
@@ -193,6 +210,17 @@ purchase_ui <- function(id) {
       ),
       
       mainPanel( 
+        HTML('
+          <div>
+          <p>These graphs are investigating the following questions</p>
+          <ul>
+            <li>What are the most popular types of houses on sales in Denmark?</li>
+            <li>What is the most purchased type of houses in Denmark in the past decades?</li>
+            <li>Does the house purchasing uprising or downsizing through the years in Denmark?</li>
+          </ul>
+          </div>
+        '),
+        hr(),
         withSpinner(plotlyOutput(ns("histogram_point"))),
         hr(),
         withSpinner(plotlyOutput(ns("box_plot"))),
@@ -200,6 +228,10 @@ purchase_ui <- function(id) {
         withSpinner(plotlyOutput(ns("bar_plot"))),
         hr(),
         withSpinner(plotlyOutput(ns("scart_point"))),
+        br(),
+        br(),
+        br(),
+        br(),
       )
     )
   )
@@ -282,7 +314,7 @@ purchase_server <- function(id, data) {
                                    , text = paste(house_type)
                                   )) +
         geom_histogram(
-          alpha = 0.7, position = "identity", bins = bins
+          alpha = 0.4, position = "identity", bins = bins
           ) +
         scale_x_continuous(labels = comma) +
         labs(
@@ -296,12 +328,15 @@ purchase_server <- function(id, data) {
         theme(plot.title = element_text(size = plot_title))
       
         if (isTRUE(color_blind)) {
-          p <- p + scale_fill_viridis_d(option = "E", begin = 0.1, end = 0.9)
+          p <- p + scale_fill_viridis_d(option = "D", begin = 0.1, end = 0.9)
         } else {
-          p <- p + scale_fill_brewer(palette = color_palette)
+          p <- p + scale_fill_manual(values = color_manual)#scale_fill_brewer(palette = color_palette)
         }
       
-      ggplotly(p, tooltip = "text")
+      ggplotly(p, tooltip = "text") %>%
+        layout(
+          margin = list(t = 80)   # increase top margin so the title is visible
+        )
       
     })
     
@@ -350,7 +385,10 @@ purchase_server <- function(id, data) {
         theme(plot.title = element_text(size = plot_title)) +
         guides(fill = "none")
       
-      ggplotly(p, tooltip = "text")
+      ggplotly(p, tooltip = "text") %>%
+        layout(
+          margin = list(t = 80)   # increase top margin so the title is visible
+        )
     })
     
     output$bar_plot <- renderPlotly({
@@ -409,7 +447,7 @@ purchase_server <- function(id, data) {
         )
       
       if (isTRUE(color_blind)) {
-        p <- p + scale_fill_viridis_d(option = "E", begin = 0.1, end = 0.9)
+        p <- p + scale_fill_viridis_d(option = "D", begin = 0.1, end = 0.9)
       } else {
         p <- p + scale_fill_brewer(palette = color_palette)
       }
@@ -431,7 +469,10 @@ purchase_server <- function(id, data) {
           )
       }
       
-      ggplotly(p, tooltip = "text")
+      ggplotly(p, tooltip = "text") %>%
+        layout(
+          margin = list(t = 80)   # increase top margin so the title is visible
+        )
     })
     
     output$scart_point <- renderPlotly({
@@ -476,8 +517,8 @@ purchase_server <- function(id, data) {
                  ))) +
       geom_jitter(width = 0.1, height = 0.1, alpha = 0.4) +
       labs(
-        title = paste0("Scatterplot of Danish Housing ", plot_label," of Selected Year between <b>", year_1,'</b> to <b>', year_2
-                       , "</b> for Selected House Type (<span style='font-size:", (plot_title - 2) ,"pt'>Mean: ", y_formatter(mean_y) ,"</span>)"),
+        title = paste0("Scatterplot of Danish Housing ", plot_label," of Year between <b>", year_1,'</b> to <b>', year_2
+                       , "</b> for House Type (<span style='font-size:", (plot_title - 2) ,"pt'>Mean: ", y_formatter(mean_y) ,"</span>)"),
         x = "Date",
         y = plot_label,
         color = "House Type"
@@ -506,13 +547,15 @@ purchase_server <- function(id, data) {
       }
       
       if (isTRUE(color_blind)) {
-        p <- p + scale_color_viridis_d(option = "E", begin = 0.1, end = 0.9)
+        p <- p + scale_color_viridis_d(option = "D", begin = 0.1, end = 0.9)
       } else {
         p <- p + scale_color_brewer(palette = color_palette)
       }
       
       ggplotly(p, tooltip = "text")%>%
-        layout(legend = list(itemsizing = "constant"))
+        layout(legend = list(itemsizing = "constant")
+          , margin = list(t = 80)   # increase top margin so the title is visible
+        )
     })
   })
 }

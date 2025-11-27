@@ -6,9 +6,12 @@ data_set_ui <- function(id) {
   ns <- NS(id)
   tabPanel(
     "Data Set",
-    mainPanel(
-      DTOutput(ns("data_table"))
-    )
+    fluidRow(
+      column(
+        width = 12,
+        DTOutput(ns("data_table"))
+      )
+      )
   )
 }
 

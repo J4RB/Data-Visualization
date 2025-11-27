@@ -35,5 +35,8 @@ bar_plot_choices <- c(
 bc <- "#377eb8"
 y_formatter <- scales::label_number(scale_cut = scales::cut_short_scale(), accuracy = 0.1)
 
-plot_title <- 11
+plot_title <- 14
 color_palette <-"Dark2"
+color_manual <- c( "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728",
+                   "#9467bd", "#8c564b", "#e377c2", "#7f7f7f"
+)#c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2")

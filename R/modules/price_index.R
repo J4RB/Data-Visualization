@@ -33,9 +33,18 @@ price_index_ui <- function(id) {
         pickerInput(ns("region"), "Select region", choices = c(unique(data$region)), selected = c(unique(data$region)), multiple = TRUE),
         pickerInput(ns("no_rooms"),"Select no rooms", choices = sort(unique(data$no_rooms)), selected = sort(unique(data$no_rooms)), multiple = TRUE),
         checkboxInput(ns("color_blind"), label = "Color-blind friendly colors", value = FALSE),
+        checkboxInput(ns("draw_line_chart"), label = "Draw line chart when drawing bar chart", value = FALSE),
         selectInput(ns("graph_type"), "Show graph type", choices = c("Line Chart", "Bar Chart"), selected = "Line Chart")
       ),
-      mainPanel(
+      mainPanel( 
+      HTML('
+          <div>
+          <p>These graphs are investigating the following question</p>
+          <ul>
+            <li>What was the house price index through the years?</li>
+          </ul>
+          </div>
+        '),
         withSpinner(plotlyOutput(ns("simple_line_chart_overall"))),
         hr(),
         withSpinner(plotlyOutput(ns("simple_line_chart")))
@@ -60,6 +69,7 @@ price_index_server <- function(id, data) {
       color_blind <- input$color_blind
       graph_base_type <- input$graph_base_type
       graph_type <- input$graph_type
+      draw_line_chart <- input$draw_line_chart
       
       
       base_type_value <- base_quarter
@@ -115,8 +125,8 @@ price_index_server <- function(id, data) {
           )
         )) +
         labs(
-          title = paste0("Tracking the Danish Housing Market (",group_by_field,"ly): Housing Price Index from Year <b>",year_1,"</b> to <b>",year_2
-          ,"</b> (Base ", group_by_field ," = <b>", base_type_value, "</b>)"),
+          title = paste0("Tracking the Danish Housing Market (",group_by_field,"ly)<br><span style='font-size:11px'><i>Housing Price Index from Year <b>",year_1,"</b> to <b>",year_2
+          ,"</b> (Base ", group_by_field ," = <b>", base_type_value, "</b></i></span>)"),
           x = group_by_field,
           y = paste0("House Price Index")
         ) +
@@ -138,8 +148,12 @@ price_index_server <- function(id, data) {
         }
         
       } else if (graph_type == "Bar Chart") {
-        p <- p + geom_col(aes(fill = "HPI")) + geom_line(aes(group = 1, color = "HPI"), size = 0.8) +  # Line connecting bars
-          geom_point(aes(fill = "HPI"), size = 1.5)         # Points on top of line
+        p <- p + geom_col(aes(fill = "HPI"))
+        
+        if(isTRUE(draw_line_chart)){
+          p <- p + geom_line(aes(group = 1, color = "HPI"), size = 0.8) +  # Line connecting bars
+            geom_point(aes(fill = "HPI"), size = 1.5)  
+        }
         
         if (isTRUE(color_blind)) {
           p <- p + scale_fill_viridis_d(option = "E")
@@ -164,7 +178,10 @@ price_index_server <- function(id, data) {
         )
       
       
-      suppressWarnings(ggplotly(p, tooltip = "text"))
+      suppressWarnings(ggplotly(p, tooltip = "text") %>%
+                         layout(
+                           margin = list(t = 80)   # increase top margin so the title is visible
+                         ))
       
     })
     
@@ -180,6 +197,7 @@ price_index_server <- function(id, data) {
       color_blind <- input$color_blind
       graph_base_type <- input$graph_base_type
       graph_type <- input$graph_type
+      draw_line_chart <- input$draw_line_chart
       
       
       base_type_value <- base_quarter
@@ -243,8 +261,8 @@ price_index_server <- function(id, data) {
           )
         )) +
         labs(
-          title = paste0("Tracking the Danish Housing Market (",group_by_field,"ly) by Region: Housing Price Index from Year <b>",year_1,"</b> to <b>",year_2
-                         ,"</b> (Base ", group_by_field ," = <b>", base_type_value, "</b>)"),
+          title = paste0("Tracking the Danish Housing Market (",group_by_field,"ly) by Region<br><span style='font-size:11px'><i>Housing Price Index from Year <b>",year_1,"</b> to <b>",year_2
+                         ,"</b> (Base ", group_by_field ," = <b>", base_type_value, "</b></i></span>)"),
           x = group_by_field,
           y = paste0("House Price Index"),
           color = "Region"
@@ -265,8 +283,12 @@ price_index_server <- function(id, data) {
         }
         
       } else if (input$graph_type == "Bar Chart") {
-        p <- p + geom_col(aes(fill = region), position = position_dodge(width = 0.8)) + geom_line(size = 0.8) +  # Line connecting bars
-          geom_point(size = 1.5)
+        p <- p + geom_col(aes(fill = region), position = position_dodge(width = 0.8))
+        
+        if(isTRUE(draw_line_chart)){
+          p <- p + geom_line(size = 0.8) +  # Line connecting bars
+            geom_point(size = 1.5)  
+        }
         
         if (isTRUE(color_blind)) {
           p <- p + scale_fill_viridis_d(option = "E")
@@ -293,7 +315,10 @@ price_index_server <- function(id, data) {
         )
       
       suppressWarnings(
-        suppressMessages((ggplotly(p, tooltip = "text"))
+        suppressMessages((ggplotly(p, tooltip = "text") %>%
+                            layout(
+                              margin = list(t = 80)   # increase top margin so the title is visible
+                            ))
         )
       )
       

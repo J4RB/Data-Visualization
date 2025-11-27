@@ -21,7 +21,7 @@ animation_ui <- function(id) {
         sliderInput(ns("speed"), "Animation Speed (fps):", min = 5, max = 40, value = 10, step = 1)
       ),
       mainPanel(
-        withSpinner(imageOutput(ns("overall_purchase"), width = "100%", height = "600px"))
+        withSpinner(imageOutput(ns("overall_purchase")))
       )
     )
   )
@@ -48,12 +48,15 @@ animation_server <- function(id, data) {
         ungroup() %>%
         mutate(house_type = factor(house_type, levels = unique(house_type)))
       
+      n_years <- length(unique(rank_data$year))
+      nframes <- n_years * 5   # 5 frames per year, adjust as needed
+      
       anim <- rank_data %>%
         ggplot(aes(x = -rank, y = total, fill = house_type)) +
         geom_col(width = 0.7) +
         geom_text(aes(label = paste0(house_type, ' [',y_formatter(total),']')), hjust = -0.1) +
         scale_x_continuous(expand = expansion(mult = c(0, 0.2))) +
-        labs(title = paste0("Bar Chart of Danish Housing: Favorite House type for Year: <b>{closest_state}</b> by <b><i>", plot_label, "</i></b>")
+        labs(title = paste0("Bar Chart of Danish Housing: Favorite House type for Year: <b>{closest_state}</b> <br>by <b><i>", plot_label, "</i></b>")
              , y = "Total Purchase Price") +
         coord_flip(clip = "off") +
         transition_states(year, transition_length = 4, state_length = 2, wrap = FALSE) +
@@ -63,12 +66,13 @@ animation_server <- function(id, data) {
         theme_void() +
         theme(
           legend.position = "none",
-          plot.margin = margin(0, 60, 0, 0),
-          plot.title = element_markdown(size = plot_title),
+          plot.title = element_markdown(size = plot_title, margin = margin(b = 5)),
+          plot.title.position = "plot",
+          plot.margin = margin(t = 0, r = 60, b = 0, l = 0)
         )
       
       if (isTRUE(color_blind)) {
-        anim <- anim + scale_fill_viridis_d(option = "E")
+        anim <- anim + scale_fill_viridis_d(option = "D")
       } else {
         anim <- anim + scale_fill_brewer(palette = color_palette)
       }
@@ -76,7 +80,7 @@ animation_server <- function(id, data) {
       
       anim_file <- tempfile(fileext = ".gif")
       
-      animate(anim, nframes = 400, fps = fps, renderer = gifski_renderer(anim_file))
+      animate(anim, nframes = nframes, fps = fps, renderer = gifski_renderer(anim_file))
       
       
       # Return GIF
