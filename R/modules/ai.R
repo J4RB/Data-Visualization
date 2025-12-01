@@ -106,6 +106,10 @@ ai_ui <- function(id) {
       ),
       
       mainPanel(
+        h2("Price Density Trends: How did the distribution of Danish housing prices change from 1992–2024?"),
+        p("This visualization is AI genereted."),
+        p("Note: Make sure to adjust the color palette to your preferences in the bottom left drop-down."),
+        
         div(
           style = "height: calc(100vh - 90px); position: relative;",
           plotOutput(ns("ridge_plot"), height = "100%")
@@ -278,7 +282,6 @@ ai_server <- function(id, data) {
         ) +
         scale_fill_gradientn(colors = pal_vals) +
         labs(
-          title = "Distribution of Housing Metric by Year",
           x = x_lab,
           y = "Year"
         ) +

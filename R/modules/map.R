@@ -86,8 +86,12 @@ map_ui <- function(id) {
       ),
       
       mainPanel(
+        h2("Map: How do square-meter prices vary by area for Danish residential housing?"),
+        p("Explore property prices, house sizes, and other metrics across Denmark."),
+        p("Note: Make sure to adjust the color palette to your preferences in the top right drop-down."),
+        
         div(
-          style = "height: calc(100vh - 90px); position: relative;",
+          style = "height: calc(100vh - 250px); position: relative;",
           leafletOutput(ns("map"), height = "100%"),
           
           # ---- Absolute color panel on top-right ----
@@ -359,6 +363,14 @@ map_server <- function(id, data, dk_zip_sf, geojson_regions) {
         )
     }
     
+    metric_names <- list(
+      sqm_price      = "price per square metre (DKK/m²)",
+      purchase_price = "purchase price (DKK)",
+      sqm            = "house size (m²)",
+      no_rooms       = "number of rooms",
+      year_build     = "year built"
+    )
+    
     # ---- React to filter changes ----
     observeEvent(
       {
@@ -367,7 +379,7 @@ map_server <- function(id, data, dk_zip_sf, geojson_regions) {
       },
       {
         req(merged())
-        update_map(merged(), input$metric, input$agg_level)
+        update_map(merged(), metric_names[[input$metric]], input$agg_level)
       }
     )
   })
