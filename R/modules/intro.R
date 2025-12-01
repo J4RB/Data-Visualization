@@ -9,7 +9,8 @@ intro_ui <- function(id) {
         
         HTML('
           <h1>Danish Residential Housing Prices</h1>
-          <p>[add introduction text here]</p>
+          <p>Understanding how housing prices evolve over time is essential for anyone navigating the real estate market, whether as a prospective homeowner, investor, or policymaker. In this project, we explore the dynamics of Danish residential housing prices from 1992 to 2024, using a comprehensive dataset that captures both national trends and regional differences.</p>
+          <p>Through a series of interactive geographic and graphical visualizations, this project seeks to transform raw data into meaningful insights. Our goal is not only to analyze long-term fluctuations, but also to shed light on practical questions faced by buyers and analysts today, such as which property types dominate the market, how prices differ across regions, and whether negotiation plays a significant role in final sale outcomes.</p>
         '),
         
         # Team Members
@@ -38,7 +39,16 @@ intro_ui <- function(id) {
         # Research Questions
         HTML('
           <h3>Research Questions</h3>
-          <p>[insert research questions]</p>
+          <p>In the following tabs, a number of visualizations will be used to answer the below research questions.</p>
+          <ul>
+            <li>What are the most popular types of houses on sales in Denmark? </li>
+            <li>What is the most purchased type of houses in Denmark in the past decades? </li>
+            <li>Does the house purchasing uprising or downsizing through the years in Denmark? </li>
+            <li>Does the number of rooms effect the sales of houses in Denmark and if yes then how? </li>
+            <li>What was the house price index through the years? </li>
+            <li>How do square-meter prices vary by area for Danish residential housing? </li>
+            <li>Does the negotiation play a crucial part when purchasing a house in Denmark?</li>
+          </ul>
         '),
         
         # Report
