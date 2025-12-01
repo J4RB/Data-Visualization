@@ -4,17 +4,35 @@ intro_ui <- function(id) {
   tabPanel(
     "Introduction",
     
-    # Container with padding for narrower text blocks
-    div(style = "padding: 20px; max-width: 800px; margin: auto;",
+    # Full page container with background
+    div(
+      style = "
+        background-image: url('background.jpg'); 
+        background-size: cover; 
+        background-position: center; 
+        background-repeat: no-repeat;
+        padding: 50px 0;
+        min-height: 100vh;
+      ",
+      
+      # Inner container
+      div(
+        style = "
+          max-width: 800px; 
+          margin: auto; 
+          background: rgba(255, 255, 255, 0.9); 
+          padding: 30px; 
+          border-radius: 10px; 
+          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+          color: black;
+        ",
         
+        # Content
         HTML('
           <h1>Danish Residential Housing Prices</h1>
           <p>Understanding how housing prices evolve over time is essential for anyone navigating the real estate market, whether as a prospective homeowner, investor, or policymaker. In this project, we explore the dynamics of Danish residential housing prices from 1992 to 2024, using a comprehensive dataset that captures both national trends and regional differences.</p>
           <p>Through a series of interactive geographic and graphical visualizations, this project seeks to transform raw data into meaningful insights. Our goal is not only to analyze long-term fluctuations, but also to shed light on practical questions faced by buyers and analysts today, such as which property types dominate the market, how prices differ across regions, and whether negotiation plays a significant role in final sale outcomes.</p>
-        '),
-        
-        # Team Members
-        HTML('
+          
           <h3>Team Members</h3>
           <p>Group 16 consists of the following members:</p>
           <ul>
@@ -22,10 +40,7 @@ intro_ui <- function(id) {
             <li>Md Al Imran Khan</li>
             <li>Jacob Bregndahl Larsen</li>
           </ul>
-        '),
-        
-        # Data
-        HTML('
+          
           <h3>Data</h3>
           <p>
             The dataset used in this project comes from Kaggle and is called
@@ -34,10 +49,7 @@ intro_ui <- function(id) {
             </a>
           </p>
           <p>For this project, we used the one hundred thousand sample version of the dataset.</p>
-        '),
-        
-        # Research Questions
-        HTML('
+          
           <h3>Research Questions</h3>
           <p>In the following tabs, a number of visualizations will be used to answer the below research questions.</p>
           <ul>
@@ -49,14 +61,19 @@ intro_ui <- function(id) {
             <li>How do square-meter prices vary by area for Danish residential housing? </li>
             <li>Does the negotiation play a crucial part when purchasing a house in Denmark?</li>
           </ul>
-        '),
-        
-        # Report
-        HTML('
+          
+          <h3>Repository</h3>
+          <p>
+          Project repository:
+            <a href="https://github.com/J4RB/Data-Visualization" target="">https://github.com/J4RB/Data-Visualization</a>
+          </p>
+          
           <h3>Report</h3>
           <p>Click the button below to download the project report:</p>
         '),
+        
         downloadButton(ns("download_pdf"), "Download Report")
+      )
     )
   )
 }
