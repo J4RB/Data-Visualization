@@ -10,6 +10,9 @@ heatmap_ui <- function(id) {
     "Heatmap",
     sidebarLayout(
       sidebarPanel(
+        HTML('
+              <p>Here you can use these options to filter the data presented in the heatmap</p>
+        '),
         pickerInput(
           ns("region"), 
           "Select region", 
@@ -43,6 +46,14 @@ heatmap_ui <- function(id) {
         )
       ),
       mainPanel(
+        HTML('
+          <div>
+          <p>This graph is investigating the following question</p>
+          <ul>
+            <li>Does the number of rooms effect the sales of houses in Denmark and if yes then how?</li>
+          </ul>
+          </div>
+        '),
         withSpinner(
           plotlyOutput(ns("heat_map"), height = '600px'),
           type = 4,
