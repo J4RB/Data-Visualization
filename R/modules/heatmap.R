@@ -43,7 +43,11 @@ heatmap_ui <- function(id) {
         )
       ),
       mainPanel(
-        plotOutput(ns("heat_map"), height = '600px')
+        withSpinner(
+          plotlyOutput(ns("heat_map"), height = '600px'),
+          type = 4,
+          color = '#444'
+          )
         )
     )
   )
@@ -61,11 +65,13 @@ heatmap_server <- function(id, data) {
         )
     })
     
-    output$heat_map <- renderPlot({
+    output$heat_map <- plotly::renderPlotly({
       df <- filtered_data() %>%
         group_by(house_type, no_rooms) %>%
-        summarise(value = mean(.data[[input$metric_choice]], na.rm = TRUE),
-                  .groups = "drop")
+        summarise(
+          value = mean(.data[[input$metric_choice]], na.rm = TRUE),
+                  .groups = "drop"
+          )
       
       metric_label <- switch(
         input$metric_choice,
@@ -80,19 +86,32 @@ heatmap_server <- function(id, data) {
         paste(input$region, collapse = ", ")
       }
       
+      df$hover_text <- paste0(
+        "<b>House Type:</b> ", df$house_type, "<br>",
+        "<b>Rooms:</b> ", df$no_rooms, "<br>",
+        "<b>", metric_label, ":</b> ", round(df$value, 2)
+      )
+      
       if (input$colorblind) {
         fill_scale <- scale_fill_viridis_c(
           option = "plasma",
+          direction = -1,
           name = metric_label
         )
       } else {
         fill_scale <- scale_fill_viridis_c(
           option = "mako",
+          direction = -1,
           name = metric_label
         )
       }
       
-      ggplot(df, aes(x = house_type, y = factor(no_rooms), fill = value)) +
+      p <- ggplot(df, aes(
+        x = house_type, 
+        y = factor(no_rooms), 
+        fill = value,
+        text = hover_text
+        )) +
         geom_tile(color = "white") +
         fill_scale +
         labs(
@@ -105,6 +124,8 @@ heatmap_server <- function(id, data) {
           axis.text.x = element_text(angle = 45, hjust = 1),
           plot.title = element_text(face = "bold", hjust = 0.5)
         )
+      plotly::ggplotly(p, tooltip = "text") %>%
+        plotly::style(hoverinfo = "text")
     })
   })
 }
