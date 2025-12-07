@@ -10,6 +10,9 @@ negotiation_plot_ui <- function(id){
     "Negotiations Plot",
     sidebarLayout(
       sidebarPanel(
+        HTML('
+              <p>Here you can use these options to filter the data presented in the heatmap</p>
+        '),
         pickerInput(
           ns("region"), 
           "Select region", 
@@ -36,7 +39,19 @@ negotiation_plot_ui <- function(id){
         )
       ),
       mainPanel(
-        plotOutput(ns("negotiation_plot"))
+        HTML('
+          <div>
+          <p>This graph is investigating the following question</p>
+          <ul>
+            <li>Does the negotiation play a crucial part when purchasing a house in Denmark?</li>
+          </ul>
+          </div>
+        '),
+        withSpinner(
+          plotlyOutput(ns("negotiation_plot")),
+          type = 4,
+          color = "#444"
+        )
       )
     )
   )
@@ -56,7 +71,7 @@ negotiation_plot_server <- function(id, data) {
     })
     
     # ----------- PLOT OUTPUT -----------
-    output$negotiation_plot <- renderPlot({
+    output$negotiation_plot <- plotly::renderPlotly({
       
       df <- filtered_data()
       
@@ -70,24 +85,41 @@ negotiation_plot_server <- function(id, data) {
         summarise(
           mean_change = mean(X._change_between_offer_and_purchase, na.rm = TRUE),
           min_change = min(X._change_between_offer_and_purchase, na.rm = TRUE),
-          max_change = max(X._change_between_offer_and_purchase, na.rm = TRUE)
+          max_change = max(X._change_between_offer_and_purchase, na.rm = TRUE),
+          .groups = 'drop'
         )
       
-      ggplot(df_summary, aes(x = year, color = region)) +
-        geom_ribbon(aes(ymin = min_change, ymax = max_change, fill = region), alpha = 0.2, color = NA) +
-        geom_line(aes(y = mean_change), size = 1) +
-        geom_point(aes(y = mean_change), size = 2, alpha = 0.7) +
-        labs(
-          title = "Average % Change with Min-Max Range Over Years",
-          x = "Year",
-          y = "% Change Between Offer and Purchase",
-          color = "Region",
-          fill = "Region"
+      p <- ggplot(df_summary, aes(x = year, color = region)) +
+        geom_ribbon(
+          aes(
+            ymin = min_change, 
+            ymax = max_change, 
+            fill = region,
+            label = paste(
+              "Region: ", region, "<br>",
+              "Year: ", year, "<br>",
+              "Mean Change: ", round(mean_change, 2), "<br>",
+              "Min Change: ", round(min_change, 2), "<br>",
+              "Max Change: ", round(max_change, 2)
+            )
+          ),
+          alpha = 0.2, color = NA
         ) +
-        theme_minimal(base_size = 14) +
-        theme(
-          plot.title = element_text(face = "bold", hjust = 0.5)
-        )
+        geom_line(aes(y = mean_change)) +
+        geom_point(
+          aes(
+            y = mean_change,
+            label = paste(
+              "Region: ", region, "<br>",
+              "Year: ", year, "<br>",
+              "Mean change: ", round(mean_change, 2)
+            )
+          ),
+          size = 2
+        ) +
+        theme_minimal()
+      
+      ggplotly(p, tooltip = "label")
   })
 })
 }
