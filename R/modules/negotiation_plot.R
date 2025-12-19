@@ -11,7 +11,7 @@ negotiation_plot_ui <- function(id){
     sidebarLayout(
       sidebarPanel(
         HTML('
-              <p>Here you can use these options to filter the data presented in the heatmap</p>
+              <p>Here you can use these options to filter the data presented in the line graph and the ribbons</p>
         '),
         pickerInput(
           ns("region"), 
@@ -45,6 +45,7 @@ negotiation_plot_ui <- function(id){
           <ul>
             <li>Does the negotiation play a crucial part when purchasing a house in Denmark?</li>
           </ul>
+          <p>Hover over the mean points to get more information about the point and the ribbons</p>
           </div>
         '),
         withSpinner(
@@ -95,13 +96,6 @@ negotiation_plot_server <- function(id, data) {
             ymin = min_change, 
             ymax = max_change, 
             fill = region,
-            label = paste(
-              "Region: ", region, "<br>",
-              "Year: ", year, "<br>",
-              "Mean Change: ", round(mean_change, 2), "<br>",
-              "Min Change: ", round(min_change, 2), "<br>",
-              "Max Change: ", round(max_change, 2)
-            )
           ),
           alpha = 0.2, color = NA
         ) +
@@ -109,17 +103,21 @@ negotiation_plot_server <- function(id, data) {
         geom_point(
           aes(
             y = mean_change,
-            label = paste(
+            text = paste(
               "Region: ", region, "<br>",
               "Year: ", year, "<br>",
-              "Mean change: ", round(mean_change, 2)
+              "Mean change: ", round(mean_change, 2), "<br>",
+              "Max change: ", max_change, "<br>",
+              "Min change: ", min_change
             )
           ),
           size = 2
         ) +
         theme_minimal()
       
-      ggplotly(p, tooltip = "label")
+      plt <- ggplotly(p, tooltip = "text")
+      
+      plt
   })
 })
 }
