@@ -16,8 +16,8 @@ server <- function(input, output, session) {
   price_index_server("price_index", data)
   map_server("map", data, dk_zip_sf, dk_region_sf)
   heatmap_server("heatmap_vis", data)
-  data_set_server("data_set", data)
   animation_server("animation", data)
   negotiation_plot_server("negotiation_plot_vis", data)
   ai_server("ai", data)
+  data_set_server("data_set", data)
 }
